@@ -535,11 +535,7 @@
 <div id="toast"></div>
 
 <script>
-// ───────────────────────────────────────────────
-// KPI POOL DATA
-// ───────────────────────────────────────────────
 const KPI_POOL = [
-  // Revenue & Sales
   { id:'mrt', name:'Monthly Revenue Target (MRT)', cat:'Revenue', unit:'AED', defaultTarget:50000, freq:'Monthly', tip:'Core revenue KPI for consumer sales agents.' },
   { id:'arpu', name:'ARPU – Avg Revenue Per User', cat:'Revenue', unit:'AED', defaultTarget:200, freq:'Monthly', tip:'Tracks average monthly spend per customer.' },
   { id:'upsell', name:'Upsell Rate', cat:'Revenue', unit:'%', defaultTarget:25, freq:'Monthly', tip:'% of existing customers moved to higher plans.' },
@@ -549,32 +545,24 @@ const KPI_POOL = [
   { id:'fiber', name:'Fiber / Broadband Sales', cat:'Revenue', unit:'count', defaultTarget:15, freq:'Monthly', tip:'New fiber/broadband subscriptions sold.' },
   { id:'bundle', name:'Bundle Package Sales', cat:'Revenue', unit:'count', defaultTarget:30, freq:'Monthly', tip:'Triple/quad-play bundles sold (mobile+broadband+TV).' },
   { id:'rpc', name:'Revenue Per Call (Telesales)', cat:'Revenue', unit:'AED', defaultTarget:850, freq:'Monthly', tip:'Average revenue generated per outbound call.' },
-
-  // Customer Acquisition
   { id:'nnc', name:'Net New Customers', cat:'Acquisition', unit:'count', defaultTarget:50, freq:'Monthly', tip:'New unique customers added this period.' },
   { id:'lcr', name:'Lead Conversion Rate', cat:'Acquisition', unit:'%', defaultTarget:30, freq:'Monthly', tip:'% of qualified leads converted to customers.' },
   { id:'cac', name:'Customer Acquisition Cost (CAC)', cat:'Acquisition', unit:'AED', defaultTarget:120, freq:'Monthly', tip:'Lower is better; cost to acquire one customer.' },
   { id:'d2d', name:'Door-to-Door Conversion Rate', cat:'Acquisition', unit:'%', defaultTarget:12, freq:'Weekly', tip:'% of field visits that result in a sale.' },
   { id:'isc', name:'In-Store Traffic Conversion', cat:'Acquisition', unit:'%', defaultTarget:22, freq:'Weekly', tip:'% of walk-in customers who make a purchase.' },
   { id:'onlinecv', name:'Online Channel Conversion', cat:'Acquisition', unit:'%', defaultTarget:5, freq:'Monthly', tip:'% of web/app leads converted to sales.' },
-
-  // Customer Experience
   { id:'csat', name:'Customer Satisfaction (CSAT)', cat:'Experience', unit:'score', defaultTarget:4.5, freq:'Monthly', tip:'Post-interaction survey score out of 5.' },
-  { id:'nps', name:'Net Promoter Score (NPS)', cat:'Experience', unit:'score', defaultTarget:60, freq:'Quarterly', tip:'Likelihood customers recommend Muscatel (–100 to +100).' },
+  { id:'nps', name:'Net Promoter Score (NPS)', cat:'Experience', unit:'score', defaultTarget:60, freq:'Quarterly', tip:'Likelihood customers recommend Muscatel (-100 to +100).' },
   { id:'fcr', name:'First Call Resolution (FCR)', cat:'Experience', unit:'%', defaultTarget:80, freq:'Monthly', tip:'% of issues resolved in first interaction.' },
   { id:'ccr', name:'Customer Complaint Rate', cat:'Experience', unit:'%', defaultTarget:2, freq:'Monthly', tip:'% of customers who filed a complaint (lower is better).' },
   { id:'churn', name:'Churn Prevention Rate', cat:'Experience', unit:'%', defaultTarget:90, freq:'Monthly', tip:'% of at-risk customers successfully retained.' },
   { id:'retention', name:'Customer Retention Rate', cat:'Experience', unit:'%', defaultTarget:92, freq:'Monthly', tip:'% of customers retained vs. start of period.' },
-
-  // Productivity
   { id:'calls', name:'Daily Calls Made', cat:'Productivity', unit:'count', defaultTarget:60, freq:'Daily', tip:'Outbound calls made per day (telesales).' },
   { id:'visits', name:'Field Visits / Day', cat:'Productivity', unit:'count', defaultTarget:12, freq:'Daily', tip:'Physical customer visits per day.' },
   { id:'proposals', name:'Proposals / Quotes Sent', cat:'Productivity', unit:'count', defaultTarget:25, freq:'Weekly', tip:'Number of formal proposals sent to prospects.' },
   { id:'pipeline', name:'Pipeline Value', cat:'Productivity', unit:'AED', defaultTarget:200000, freq:'Monthly', tip:'Total value of deals in the active pipeline.' },
   { id:'scd', name:'Sales Cycle Duration', cat:'Productivity', unit:'days', defaultTarget:7, freq:'Monthly', tip:'Average days from lead to close (lower is better).' },
   { id:'followup', name:'Follow-up Rate', cat:'Productivity', unit:'%', defaultTarget:85, freq:'Weekly', tip:'% of leads that received a timely follow-up.' },
-
-  // Product Penetration
   { id:'dataup', name:'Data Package Upgrade Rate', cat:'Penetration', unit:'%', defaultTarget:18, freq:'Monthly', tip:'% of customers who upgraded their data plan.' },
   { id:'voiceup', name:'Voice Package Upgrade Rate', cat:'Penetration', unit:'%', defaultTarget:10, freq:'Monthly', tip:'% of customers who upgraded their voice plan.' },
   { id:'roaming', name:'International Roaming Sales', cat:'Penetration', unit:'count', defaultTarget:20, freq:'Monthly', tip:'New roaming add-ons sold.' },
@@ -590,7 +578,6 @@ const CAT_COLORS = {
   Penetration: { bg:'#fce7f3', border:'#f9a8d4', text:'#9d174d' },
 };
 
-// Smart suggestions map: if you pick from these cats, suggest the others
 const SUGGESTIONS = {
   Revenue: { msg:'Revenue KPIs are stronger with acquisition metrics.', suggest:['nnc','lcr','upsell'] },
   Acquisition: { msg:'Pair acquisition KPIs with experience metrics to measure quality.', suggest:['csat','fcr','retention'] },
@@ -599,15 +586,9 @@ const SUGGESTIONS = {
   Penetration: { msg:'Product penetration works best alongside revenue & CX KPIs.', suggest:['arpu','csat','crosssell'] },
 };
 
-// ───────────────────────────────────────────────
-// STATE
-// ───────────────────────────────────────────────
-let selectedKPIs = []; // { id, name, cat, unit, target, weight, freq, actual }
+let selectedKPIs = [];
 let activeFilter = 'All';
 
-// ───────────────────────────────────────────────
-// POOL RENDERING
-// ───────────────────────────────────────────────
 function renderPool() {
   const query = document.getElementById('kpiSearch').value.toLowerCase();
   const grid = document.getElementById('kpiPoolGrid');
@@ -641,9 +622,6 @@ function setFilter(cat, el) {
 
 function filterPool() { renderPool(); }
 
-// ───────────────────────────────────────────────
-// TOGGLE KPI
-// ───────────────────────────────────────────────
 function toggleKPI(id) {
   const kpi = KPI_POOL.find(k => k.id === id);
   const idx = selectedKPIs.findIndex(s => s.id === id);
@@ -663,15 +641,11 @@ function toggleKPI(id) {
 
 function autoWeight() {
   if (!selectedKPIs.length) return;
-  // Distribute evenly to nearest integer, give remainder to first
   const base = Math.floor(100 / selectedKPIs.length);
   const rem = 100 - base * selectedKPIs.length;
   selectedKPIs.forEach((k, i) => k.weight = base + (i === 0 ? rem : 0));
 }
 
-// ───────────────────────────────────────────────
-// SELECTED TABLE
-// ───────────────────────────────────────────────
 function renderSelectedTable() {
   const body = document.getElementById('selectedBody');
   if (!selectedKPIs.length) {
@@ -725,9 +699,6 @@ function updateWeightIndicator() {
   el.className = 'weight-indicator ' + (total === 100 ? 'weight-ok' : total > 100 ? 'weight-error' : 'weight-warn');
 }
 
-// ───────────────────────────────────────────────
-// SUGGESTIONS
-// ───────────────────────────────────────────────
 function updateSuggestions() {
   const box = document.getElementById('suggestionBox');
   if (!selectedKPIs.length) { box.classList.remove('show'); return; }
@@ -750,9 +721,6 @@ function addSuggestedKPI(id) {
   if (!selectedKPIs.find(k => k.id === id)) toggleKPI(id);
 }
 
-// ───────────────────────────────────────────────
-// DASHBOARD
-// ───────────────────────────────────────────────
 function goToDashboard() {
   if (!selectedKPIs.length) { showToast('Please select at least one KPI first.', 'error'); return; }
   switchTab('dashboard', document.querySelector('[data-tab=dashboard]'));
@@ -856,9 +824,6 @@ function setActual(i) {
   showToast('Actual value updated ✓', 'success');
 }
 
-// ───────────────────────────────────────────────
-// TAB SWITCHING
-// ───────────────────────────────────────────────
 function switchTab(tab, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -867,9 +832,6 @@ function switchTab(tab, btn) {
   if (tab === 'dashboard') renderDashboard();
 }
 
-// ───────────────────────────────────────────────
-// PERSIST
-// ───────────────────────────────────────────────
 function saveToStorage() {
   const data = {
     emp: {
@@ -903,9 +865,6 @@ function loadFromStorage() {
   showToast('Saved KPI set loaded ✓', 'success');
 }
 
-// ───────────────────────────────────────────────
-// TOAST
-// ───────────────────────────────────────────────
 let toastTimer;
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
@@ -915,9 +874,6 @@ function showToast(msg, type = '') {
   toastTimer = setTimeout(() => t.className = '', 3000);
 }
 
-// ───────────────────────────────────────────────
-// INIT
-// ───────────────────────────────────────────────
 renderPool();
 renderSelectedTable();
 </script>
