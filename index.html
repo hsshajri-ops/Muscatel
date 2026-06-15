@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Muscatel – KPI Management | Consumer Unit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --primary-light: #818cf8;
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 10px 30px rgba(0,0,0,.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4f46e5 70%, #06b6d4 100%);
+      padding: 0 2rem;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 20px rgba(79,70,229,.4);
+    }
+    .header-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 72px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: rgba(255,255,255,.15); border: 2px solid rgba(255,255,255,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -1px;
+    }
+    .brand-text h1 { color: #fff; font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+    .brand-text p { color: rgba(255,255,255,.65); font-size: .75rem; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; }
+    .header-actions { display: flex; gap: 10px; }
+    .btn-header {
+      padding: 8px 18px; border-radius: 8px; font-size: .85rem; font-weight: 600;
+      cursor: pointer; border: none; transition: all .2s;
+    }
+    .btn-outline-white {
+      background: rgba(255,255,255,.12); color: #fff;
+      border: 1.5px solid rgba(255,255,255,.3);
+    }
+    .btn-outline-white:hover { background: rgba(255,255,255,.22); }
+    .btn-white { background: #fff; color: var(--primary); }
+    .btn-white:hover { background: #e0e7ff; }
+
+    /* NAV TABS */
+    .nav-tabs {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+    .nav-tabs-inner {
+      max-width: 1280px; margin: 0 auto;
+      display: flex; gap: 0;
+    }
+    .tab-btn {
+      padding: 14px 24px; font-size: .88rem; font-weight: 600; color: var(--text-muted);
+      background: none; border: none; cursor: pointer;
+      border-bottom: 3px solid transparent; transition: all .2s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-btn:hover:not(.active) { color: var(--text); background: var(--bg); }
+    .tab-icon { font-size: 16px; }
+
+    /* MAIN */
+    main { max-width: 1280px; margin: 0 auto; padding: 2rem; }
+
+    /* PANEL */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* SECTION HEADING */
+    .section-heading { margin-bottom: 1.5rem; }
+    .section-heading h2 { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+    .section-heading p { color: var(--text-muted); font-size: .9rem; margin-top: 4px; }
+
+    /* CARDS */
+    .card {
+      background: var(--surface); border-radius: var(--radius);
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+    .card-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+
+    /* GRID */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .col-span-2 { grid-column: span 2; }
+
+    /* FORM */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: span 2; }
+    label { font-size: .82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+    input, select, textarea {
+      padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: .9rem; color: var(--text);
+      background: var(--bg); transition: border .2s, box-shadow .2s;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+      background: #fff;
+    }
+    input::placeholder { color: #a0aec0; }
+
+    /* BUTTONS */
+    .btn {
+      padding: 10px 20px; border-radius: 8px; font-size: .88rem; font-weight: 600;
+      cursor: pointer; border: none; transition: all .2s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,.35); }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger-sm {
+      padding: 4px 10px; font-size: .75rem; background: #fee2e2; color: var(--danger);
+      border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all .2s;
+    }
+    .btn-danger-sm:hover { background: var(--danger); color: #fff; }
+
+    /* KPI POOL */
+    .kpi-pool-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: gap: 8px; }
+    .search-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem;
+    }
+    .search-input { position: relative; flex: 1; min-width: 200px; }
+    .search-input input { width: 100%; padding-left: 36px; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; }
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      padding: 5px 12px; border-radius: 20px; font-size: .78rem; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted);
+      transition: all .2s;
+    }
+    .pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .pill:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+
+    .kpi-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; max-height: 360px; overflow-y: auto; padding-right: 4px; }
+    .kpi-pool-grid::-webkit-scrollbar { width: 5px; }
+    .kpi-pool-grid::-webkit-scrollbar-track { background: var(--bg); }
+    .kpi-pool-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .kpi-item {
+      padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--border);
+      cursor: pointer; transition: all .2s; background: var(--bg);
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .kpi-item:hover { border-color: var(--primary); background: #eef2ff; transform: translateY(-1px); }
+    .kpi-item.selected { border-color: var(--primary); background: #eef2ff; }
+    .kpi-item.selected .kpi-item-check { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .kpi-item-check {
+      width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center; font-size: 11px;
+      flex-shrink: 0; margin-top: 1px; transition: all .2s;
+    }
+    .kpi-item-info { flex: 1; }
+    .kpi-item-name { font-size: .85rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .kpi-item-meta { font-size: .75rem; color: var(--text-muted); margin-top: 3px; display: flex; gap: 6px; }
+    .cat-badge {
+      font-size: .68rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: .04em;
+    }
+
+    /* SELECTED KPIs TABLE */
+    .selected-kpis { margin-top: 1.5rem; }
+    .selected-kpis h3 { font-size: .95rem; font-weight: 700; margin-bottom: .75rem; display: flex; align-items: center; gap: 8px; }
+    .weight-indicator { font-size: .8rem; font-weight: 600; }
+    .weight-ok { color: var(--success); }
+    .weight-warn { color: var(--warning); }
+    .weight-error { color: var(--danger); }
+
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    thead th { text-align: left; padding: 10px 12px; font-size: .75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 2px solid var(--border); background: var(--bg); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody td { padding: 10px 12px; }
+    tbody td input, tbody td select { padding: 6px 10px; font-size: .83rem; min-width: 80px; }
+
+    /* SUGGESTION BANNER */
+    .suggestion-box {
+      background: linear-gradient(135deg, #ede9fe, #dbeafe);
+      border: 1.5px solid #c4b5fd; border-radius: 10px;
+      padding: 12px 16px; margin-top: 1rem; display: none;
+    }
+    .suggestion-box.show { display: flex; align-items: flex-start; gap: 12px; }
+    .suggestion-box-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .suggestion-box-text { flex: 1; }
+    .suggestion-box-text h4 { font-size: .85rem; font-weight: 700; color: var(--primary-dark); }
+    .suggestion-box-text p { font-size: .8rem; color: #4338ca; margin-top: 2px; }
+    .suggestion-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .suggestion-tag {
+      padding: 3px 10px; background: #fff; border: 1.5px solid #a5b4fc;
+      border-radius: 6px; font-size: .75rem; font-weight: 600; color: var(--primary);
+      cursor: pointer; transition: all .2s;
+    }
+    .suggestion-tag:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* DASHBOARD */
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem; box-shadow: var(--shadow); position: relative; overflow: hidden;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .stat-card.blue::before { background: var(--primary); }
+    .stat-card.green::before { background: var(--success); }
+    .stat-card.yellow::before { background: var(--warning); }
+    .stat-card.cyan::before { background: var(--accent); }
+    .stat-label { font-size: .75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat-value { font-size: 2rem; font-weight: 800; margin-top: 6px; line-height: 1; }
+    .stat-sub { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
+    .stat-icon { position: absolute; top: 1rem; right: 1rem; font-size: 28px; opacity: .15; }
+
+    .overall-score {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--accent));
+      border-radius: var(--radius); padding: 1.5rem 2rem; color: #fff;
+      display: flex; align-items: center; gap: 2rem; margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-md);
+    }
+    .score-ring {
+      width: 90px; height: 90px; border-radius: 50%;
+      border: 5px solid rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      position: relative;
+    }
+    .score-ring-num { font-size: 1.6rem; font-weight: 800; }
+    .score-ring-pct { font-size: .75rem; font-weight: 600; }
+    .score-info h3 { font-size: 1.1rem; font-weight: 700; }
+    .score-info p { opacity: .8; font-size: .85rem; margin-top: 4px; }
+    .score-legend { display: flex; gap: 20px; margin-top: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: .78rem; opacity: .85; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .kpi-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+    .kpi-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.25rem; box-shadow: var(--shadow); transition: all .2s;
+    }
+    .kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .kpi-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .75rem; }
+    .kpi-card-name { font-size: .9rem; font-weight: 700; line-height: 1.3; flex: 1; margin-right: 8px; }
+    .kpi-card-weight { font-size: .75rem; font-weight: 700; color: var(--text-muted); background: var(--bg); padding: 2px 8px; border-radius: 4px; flex-shrink: 0; }
+    .kpi-card-values { display: flex; gap: 1rem; margin-bottom: .75rem; }
+    .kpi-val { flex: 1; }
+    .kpi-val-label { font-size: .7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+    .kpi-val-num { font-size: 1.1rem; font-weight: 700; margin-top: 2px; }
+    .progress-bar-wrap { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+    .progress-bar { height: 100%; border-radius: 4px; transition: width .6s ease; }
+    .progress-label { display: flex; justify-content: space-between; font-size: .72rem; color: var(--text-muted); margin-top: 4px; }
+    .achievement-input-row { display: flex; gap: 8px; margin-top: .75rem; align-items: center; }
+    .achievement-input-row input { flex: 1; padding: 6px 10px; font-size: .85rem; }
+    .achievement-input-row .btn { padding: 6px 14px; font-size: .8rem; }
+    .status-chip {
+      display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px;
+      border-radius: 20px; font-size: .72rem; font-weight: 700;
+    }
+    .status-red { background: #fee2e2; color: var(--danger); }
+    .status-yellow { background: #fef3c7; color: #92400e; }
+    .status-green { background: #d1fae5; color: #065f46; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+    .empty-state-icon { font-size: 56px; margin-bottom: 1rem; opacity: .4; }
+    .empty-state h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: .5rem; }
+    .empty-state p { font-size: .88rem; max-width: 320px; margin: 0 auto; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: #1e293b; color: #fff; padding: 12px 20px; border-radius: 10px;
+      font-size: .88rem; font-weight: 500; box-shadow: var(--shadow-md);
+      transform: translateY(80px); opacity: 0; transition: all .3s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { background: var(--success); }
+    #toast.error { background: var(--danger); }
+
+    /* PRINT */
+    @media print {
+      header, .nav-tabs, .header-actions, .btn, .achievement-input-row { display: none !important; }
+      main { padding: 0; }
+      .kpi-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: span 1; }
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .overall-score { flex-direction: column; }
+      thead { display: none; }
+      tbody tr { display: block; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+      tbody td { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; }
+      tbody td::before { content: attr(data-label); font-size: .75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">M</div>
+      <div class="brand-text">
+        <h1>Muscatel Telecom</h1>
+        <p>Consumer Unit · KPI Management</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-header btn-outline-white" onclick="loadFromStorage()">↩ Load Saved</button>
+      <button class="btn-header btn-outline-white" onclick="saveToStorage()">💾 Save</button>
+      <button class="btn-header btn-white" onclick="window.print()">🖨 Print / PDF</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="tab-btn active" data-tab="setup" onclick="switchTab('setup', this)"><span class="tab-icon">⚙️</span> KPI Setup</button>
+    <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard', this)"><span class="tab-icon">📊</span> Dashboard</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ===================== SETUP PANEL ===================== -->
+  <div class="panel active" id="panel-setup">
+
+    <!-- Employee Info -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title"><span class="dot"></span> Employee Information</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="empName" placeholder="e.g. Ahmed Al Mansouri" />
+        </div>
+        <div class="form-group">
+          <label>Employee ID</label>
+          <input type="text" id="empId" placeholder="e.g. MUS-10042" />
+        </div>
+        <div class="form-group">
+          <label>Team / Supervisor</label>
+          <input type="text" id="empTeam" placeholder="e.g. Team Alpha – Sara Khalid" />
+        </div>
+        <div class="form-group">
+          <label>Sales Channel</label>
+          <select id="empChannel">
+            <option value="">Select channel...</option>
+            <option>In-Store Retail</option>
+            <option>Field / Door-to-Door</option>
+            <option>Online / Digital</option>
+            <option>Telesales</option>
+            <option>B2C Account Management</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>KPI Period</label>
+          <select id="empPeriod">
+            <option value="">Select period...</option>
+            <option>Q1 2025 (Jan–Mar)</option>
+            <option>Q2 2025 (Apr–Jun)</option>
+            <option>Q3 2025 (Jul–Sep)</option>
+            <option>Q4 2025 (Oct–Dec)</option>
+            <option>Q1 2026 (Jan–Mar)</option>
+            <option>Q2 2026 (Apr–Jun)</option>
+            <option>Full Year 2025</option>
+            <option>Full Year 2026</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Region</label>
+          <select id="empRegion">
+            <option value="">Select region...</option>
+            <option>Abu Dhabi</option>
+            <option>Dubai</option>
+            <option>Sharjah</option>
+            <option>Northern Emirates</option>
+            <option>Al Ain</option>
+            <option>Western Region</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Pool -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title"><span class="dot"></span> Smart KPI Pool — Consumer Sales Agent</div>
+      <div class="search-bar">
+        <div class="search-input">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="kpiSearch" placeholder="Search KPIs..." oninput="filterPool()" />
+        </div>
+        <div class="filter-pills" id="filterPills">
+          <span class="pill active" data-cat="All" onclick="setFilter('All', this)">All</span>
+          <span class="pill" data-cat="Revenue" onclick="setFilter('Revenue', this)" style="background:#fef3c7;border-color:#fde68a;color:#92400e">Revenue & Sales</span>
+          <span class="pill" data-cat="Acquisition" onclick="setFilter('Acquisition', this)" style="background:#dbeafe;border-color:#bfdbfe;color:#1e40af">Acquisition</span>
+          <span class="pill" data-cat="Experience" onclick="setFilter('Experience', this)" style="background:#d1fae5;border-color:#a7f3d0;color:#065f46">CX & Quality</span>
+          <span class="pill" data-cat="Productivity" onclick="setFilter('Productivity', this)" style="background:#ede9fe;border-color:#c4b5fd;color:#5b21b6">Productivity</span>
+          <span class="pill" data-cat="Penetration" onclick="setFilter('Penetration', this)" style="background:#fce7f3;border-color:#f9a8d4;color:#9d174d">Product</span>
+        </div>
+      </div>
+      <div class="kpi-pool-grid" id="kpiPoolGrid"></div>
+
+      <!-- Smart Suggestion -->
+      <div class="suggestion-box" id="suggestionBox">
+        <div class="suggestion-box-icon">💡</div>
+        <div class="suggestion-box-text">
+          <h4>Smart Suggestion</h4>
+          <p id="suggestionText">Add complementary KPIs to get a balanced scorecard.</p>
+          <div class="suggestion-tags" id="suggestionTags"></div>
+        </div>
+      </div>
+
+      <!-- Selected KPIs -->
+      <div class="selected-kpis">
+        <h3>
+          Selected KPIs
+          <span class="weight-indicator" id="weightIndicator">Total Weight: 0%</span>
+        </h3>
+        <div style="overflow-x:auto">
+          <table id="selectedTable">
+            <thead>
+              <tr>
+                <th>KPI Name</th>
+                <th>Category</th>
+                <th>Target</th>
+                <th>Unit</th>
+                <th>Weight %</th>
+                <th>Frequency</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="selectedBody">
+              <tr id="emptyRow"><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted);font-style:italic">No KPIs selected. Pick from the pool above.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:1.5rem;justify-content:flex-end">
+        <button class="btn btn-secondary" onclick="clearAll()">🗑 Clear All</button>
+        <button class="btn btn-primary" onclick="goToDashboard()">📊 View Dashboard →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== DASHBOARD PANEL ===================== -->
+  <div class="panel" id="panel-dashboard">
+    <div class="section-heading">
+      <h2 id="dashTitle">KPI Dashboard</h2>
+      <p id="dashSub">Track your performance against targets</p>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card blue">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-label">Total KPIs</div>
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-sub">Active KPIs this period</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">On Track</div>
+        <div class="stat-value" id="statGreen">0</div>
+        <div class="stat-sub">≥ 80% achievement</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-label">At Risk</div>
+        <div class="stat-value" id="statYellow">0</div>
+        <div class="stat-sub">60–79% achievement</div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-icon">🔴</div>
+        <div class="stat-label">Below Target</div>
+        <div class="stat-value" id="statRed">0</div>
+        <div class="stat-sub">&lt; 60% achievement</div>
+      </div>
+    </div>
+
+    <div class="overall-score" id="overallScore">
+      <div class="score-ring">
+        <div style="text-align:center">
+          <div class="score-ring-num" id="overallNum">–</div>
+          <div class="score-ring-pct">Overall</div>
+        </div>
+      </div>
+      <div class="score-info">
+        <h3 id="scoreLabel">Set your KPIs to get started</h3>
+        <p id="scorePeriod">No data yet</p>
+        <div class="score-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> On Track ≥80%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> At Risk 60–79%</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Below Target &lt;60%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-cards" id="kpiCards">
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-state-icon">📋</div>
+        <h3>No KPIs configured</h3>
+        <p>Go to KPI Setup to select your KPIs and targets for this period.</p>
+        <button class="btn btn-primary" style="margin-top:1rem" onclick="switchTab('setup', document.querySelector('[data-tab=setup]'))">Go to Setup →</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ───────────────────────────────────────────────
+// KPI POOL DATA
+// ───────────────────────────────────────────────
+const KPI_POOL = [
+  // Revenue & Sales
+  { id:'mrt', name:'Monthly Revenue Target (MRT)', cat:'Revenue', unit:'AED', defaultTarget:50000, freq:'Monthly', tip:'Core revenue KPI for consumer sales agents.' },
+  { id:'arpu', name:'ARPU – Avg Revenue Per User', cat:'Revenue', unit:'AED', defaultTarget:200, freq:'Monthly', tip:'Tracks average monthly spend per customer.' },
+  { id:'upsell', name:'Upsell Rate', cat:'Revenue', unit:'%', defaultTarget:25, freq:'Monthly', tip:'% of existing customers moved to higher plans.' },
+  { id:'crosssell', name:'Cross-sell Rate', cat:'Revenue', unit:'%', defaultTarget:20, freq:'Monthly', tip:'% of customers who bought an additional product.' },
+  { id:'newpost', name:'New Postpaid Connections', cat:'Revenue', unit:'count', defaultTarget:40, freq:'Monthly', tip:'Number of new postpaid SIMs activated.' },
+  { id:'newpre', name:'New Prepaid Activations', cat:'Revenue', unit:'count', defaultTarget:80, freq:'Monthly', tip:'Number of new prepaid SIM activations.' },
+  { id:'fiber', name:'Fiber / Broadband Sales', cat:'Revenue', unit:'count', defaultTarget:15, freq:'Monthly', tip:'New fiber/broadband subscriptions sold.' },
+  { id:'bundle', name:'Bundle Package Sales', cat:'Revenue', unit:'count', defaultTarget:30, freq:'Monthly', tip:'Triple/quad-play bundles sold (mobile+broadband+TV).' },
+  { id:'rpc', name:'Revenue Per Call (Telesales)', cat:'Revenue', unit:'AED', defaultTarget:850, freq:'Monthly', tip:'Average revenue generated per outbound call.' },
+
+  // Customer Acquisition
+  { id:'nnc', name:'Net New Customers', cat:'Acquisition', unit:'count', defaultTarget:50, freq:'Monthly', tip:'New unique customers added this period.' },
+  { id:'lcr', name:'Lead Conversion Rate', cat:'Acquisition', unit:'%', defaultTarget:30, freq:'Monthly', tip:'% of qualified leads converted to customers.' },
+  { id:'cac', name:'Customer Acquisition Cost (CAC)', cat:'Acquisition', unit:'AED', defaultTarget:120, freq:'Monthly', tip:'Lower is better; cost to acquire one customer.' },
+  { id:'d2d', name:'Door-to-Door Conversion Rate', cat:'Acquisition', unit:'%', defaultTarget:12, freq:'Weekly', tip:'% of field visits that result in a sale.' },
+  { id:'isc', name:'In-Store Traffic Conversion', cat:'Acquisition', unit:'%', defaultTarget:22, freq:'Weekly', tip:'% of walk-in customers who make a purchase.' },
+  { id:'onlinecv', name:'Online Channel Conversion', cat:'Acquisition', unit:'%', defaultTarget:5, freq:'Monthly', tip:'% of web/app leads converted to sales.' },
+
+  // Customer Experience
+  { id:'csat', name:'Customer Satisfaction (CSAT)', cat:'Experience', unit:'score', defaultTarget:4.5, freq:'Monthly', tip:'Post-interaction survey score out of 5.' },
+  { id:'nps', name:'Net Promoter Score (NPS)', cat:'Experience', unit:'score', defaultTarget:60, freq:'Quarterly', tip:'Likelihood customers recommend Muscatel (–100 to +100).' },
+  { id:'fcr', name:'First Call Resolution (FCR)', cat:'Experience', unit:'%', defaultTarget:80, freq:'Monthly', tip:'% of issues resolved in first interaction.' },
+  { id:'ccr', name:'Customer Complaint Rate', cat:'Experience', unit:'%', defaultTarget:2, freq:'Monthly', tip:'% of customers who filed a complaint (lower is better).' },
+  { id:'churn', name:'Churn Prevention Rate', cat:'Experience', unit:'%', defaultTarget:90, freq:'Monthly', tip:'% of at-risk customers successfully retained.' },
+  { id:'retention', name:'Customer Retention Rate', cat:'Experience', unit:'%', defaultTarget:92, freq:'Monthly', tip:'% of customers retained vs. start of period.' },
+
+  // Productivity
+  { id:'calls', name:'Daily Calls Made', cat:'Productivity', unit:'count', defaultTarget:60, freq:'Daily', tip:'Outbound calls made per day (telesales).' },
+  { id:'visits', name:'Field Visits / Day', cat:'Productivity', unit:'count', defaultTarget:12, freq:'Daily', tip:'Physical customer visits per day.' },
+  { id:'proposals', name:'Proposals / Quotes Sent', cat:'Productivity', unit:'count', defaultTarget:25, freq:'Weekly', tip:'Number of formal proposals sent to prospects.' },
+  { id:'pipeline', name:'Pipeline Value', cat:'Productivity', unit:'AED', defaultTarget:200000, freq:'Monthly', tip:'Total value of deals in the active pipeline.' },
+  { id:'scd', name:'Sales Cycle Duration', cat:'Productivity', unit:'days', defaultTarget:7, freq:'Monthly', tip:'Average days from lead to close (lower is better).' },
+  { id:'followup', name:'Follow-up Rate', cat:'Productivity', unit:'%', defaultTarget:85, freq:'Weekly', tip:'% of leads that received a timely follow-up.' },
+
+  // Product Penetration
+  { id:'dataup', name:'Data Package Upgrade Rate', cat:'Penetration', unit:'%', defaultTarget:18, freq:'Monthly', tip:'% of customers who upgraded their data plan.' },
+  { id:'voiceup', name:'Voice Package Upgrade Rate', cat:'Penetration', unit:'%', defaultTarget:10, freq:'Monthly', tip:'% of customers who upgraded their voice plan.' },
+  { id:'roaming', name:'International Roaming Sales', cat:'Penetration', unit:'count', defaultTarget:20, freq:'Monthly', tip:'New roaming add-ons sold.' },
+  { id:'device', name:'Device / Handset Sales', cat:'Penetration', unit:'count', defaultTarget:15, freq:'Monthly', tip:'Smartphones / tablets sold alongside plans.' },
+  { id:'vas', name:'VAS Attachment Rate', cat:'Penetration', unit:'%', defaultTarget:35, freq:'Monthly', tip:'% of activations with at least one VAS attached.' },
+];
+
+const CAT_COLORS = {
+  Revenue:     { bg:'#fef3c7', border:'#fde68a', text:'#92400e' },
+  Acquisition: { bg:'#dbeafe', border:'#bfdbfe', text:'#1e40af' },
+  Experience:  { bg:'#d1fae5', border:'#a7f3d0', text:'#065f46' },
+  Productivity:{ bg:'#ede9fe', border:'#c4b5fd', text:'#5b21b6' },
+  Penetration: { bg:'#fce7f3', border:'#f9a8d4', text:'#9d174d' },
+};
+
+// Smart suggestions map: if you pick from these cats, suggest the others
+const SUGGESTIONS = {
+  Revenue: { msg:'Revenue KPIs are stronger with acquisition metrics.', suggest:['nnc','lcr','upsell'] },
+  Acquisition: { msg:'Pair acquisition KPIs with experience metrics to measure quality.', suggest:['csat','fcr','retention'] },
+  Experience: { msg:'Complement CX KPIs with productivity drivers.', suggest:['calls','followup','proposals'] },
+  Productivity: { msg:'Boost your scorecard with revenue outcome KPIs.', suggest:['mrt','arpu','bundle'] },
+  Penetration: { msg:'Product penetration works best alongside revenue & CX KPIs.', suggest:['arpu','csat','crosssell'] },
+};
+
+// ───────────────────────────────────────────────
+// STATE
+// ───────────────────────────────────────────────
+let selectedKPIs = []; // { id, name, cat, unit, target, weight, freq, actual }
+let activeFilter = 'All';
+
+// ───────────────────────────────────────────────
+// POOL RENDERING
+// ───────────────────────────────────────────────
+function renderPool() {
+  const query = document.getElementById('kpiSearch').value.toLowerCase();
+  const grid = document.getElementById('kpiPoolGrid');
+  const filtered = KPI_POOL.filter(k => {
+    const matchCat = activeFilter === 'All' || k.cat === activeFilter;
+    const matchQ = !query || k.name.toLowerCase().includes(query) || k.cat.toLowerCase().includes(query);
+    return matchCat && matchQ;
+  });
+  grid.innerHTML = filtered.map(k => {
+    const sel = selectedKPIs.find(s => s.id === k.id);
+    const c = CAT_COLORS[k.cat];
+    return `<div class="kpi-item ${sel ? 'selected' : ''}" onclick="toggleKPI('${k.id}')" title="${k.tip}">
+      <div class="kpi-item-check">${sel ? '✓' : ''}</div>
+      <div class="kpi-item-info">
+        <div class="kpi-item-name">${k.name}</div>
+        <div class="kpi-item-meta">
+          <span class="cat-badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${k.cat}</span>
+          <span>Default: ${k.defaultTarget} ${k.unit}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<div style="padding:2rem;color:var(--text-muted);text-align:center">No KPIs match your search.</div>';
+}
+
+function setFilter(cat, el) {
+  activeFilter = cat;
+  document.querySelectorAll('#filterPills .pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderPool();
+}
+
+function filterPool() { renderPool(); }
+
+// ───────────────────────────────────────────────
+// TOGGLE KPI
+// ───────────────────────────────────────────────
+function toggleKPI(id) {
+  const kpi = KPI_POOL.find(k => k.id === id);
+  const idx = selectedKPIs.findIndex(s => s.id === id);
+  if (idx >= 0) {
+    selectedKPIs.splice(idx, 1);
+  } else {
+    selectedKPIs.push({
+      id: kpi.id, name: kpi.name, cat: kpi.cat, unit: kpi.unit,
+      target: kpi.defaultTarget, weight: 0, freq: kpi.freq, actual: ''
+    });
+  }
+  autoWeight();
+  renderPool();
+  renderSelectedTable();
+  updateSuggestions();
+}
+
+function autoWeight() {
+  if (!selectedKPIs.length) return;
+  // Distribute evenly to nearest integer, give remainder to first
+  const base = Math.floor(100 / selectedKPIs.length);
+  const rem = 100 - base * selectedKPIs.length;
+  selectedKPIs.forEach((k, i) => k.weight = base + (i === 0 ? rem : 0));
+}
+
+// ───────────────────────────────────────────────
+// SELECTED TABLE
+// ───────────────────────────────────────────────
+function renderSelectedTable() {
+  const body = document.getElementById('selectedBody');
+  if (!selectedKPIs.length) {
+    body.innerHTML = '<tr id="emptyRow"><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted);font-style:italic">No KPIs selected. Pick from the pool above.</td></tr>';
+    updateWeightIndicator();
+    return;
+  }
+  const c_map = CAT_COLORS;
+  body.innerHTML = selectedKPIs.map((k, i) => {
+    const c = c_map[k.cat];
+    return `<tr>
+      <td data-label="KPI Name"><strong>${k.name}</strong></td>
+      <td data-label="Category"><span class="cat-badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${k.cat}</span></td>
+      <td data-label="Target"><input type="number" value="${k.target}" min="0" step="any" onchange="selectedKPIs[${i}].target=+this.value" style="width:100px" /></td>
+      <td data-label="Unit">
+        <select onchange="selectedKPIs[${i}].unit=this.value">
+          ${['%','AED','count','score','days','mins','rating'].map(u=>`<option ${k.unit===u?'selected':''}>${u}</option>`).join('')}
+        </select>
+      </td>
+      <td data-label="Weight %"><input type="number" value="${k.weight}" min="0" max="100" onchange="selectedKPIs[${i}].weight=+this.value;updateWeightIndicator()" style="width:80px" /></td>
+      <td data-label="Frequency">
+        <select onchange="selectedKPIs[${i}].freq=this.value">
+          ${['Daily','Weekly','Monthly','Quarterly'].map(f=>`<option ${k.freq===f?'selected':''}>${f}</option>`).join('')}
+        </select>
+      </td>
+      <td><button class="btn-danger-sm" onclick="removeKPI('${k.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+  updateWeightIndicator();
+}
+
+function removeKPI(id) {
+  selectedKPIs = selectedKPIs.filter(k => k.id !== id);
+  autoWeight();
+  renderPool();
+  renderSelectedTable();
+  updateSuggestions();
+}
+
+function clearAll() {
+  selectedKPIs = [];
+  renderPool();
+  renderSelectedTable();
+  updateSuggestions();
+}
+
+function updateWeightIndicator() {
+  const total = selectedKPIs.reduce((s, k) => s + (+k.weight || 0), 0);
+  const el = document.getElementById('weightIndicator');
+  el.textContent = `Total Weight: ${total}%`;
+  el.className = 'weight-indicator ' + (total === 100 ? 'weight-ok' : total > 100 ? 'weight-error' : 'weight-warn');
+}
+
+// ───────────────────────────────────────────────
+// SUGGESTIONS
+// ───────────────────────────────────────────────
+function updateSuggestions() {
+  const box = document.getElementById('suggestionBox');
+  if (!selectedKPIs.length) { box.classList.remove('show'); return; }
+  const cats = [...new Set(selectedKPIs.map(k => k.cat))];
+  const firstCat = cats[0];
+  const sug = SUGGESTIONS[firstCat];
+  if (!sug) { box.classList.remove('show'); return; }
+  const notYetSelected = sug.suggest.filter(id => !selectedKPIs.find(k => k.id === id));
+  if (!notYetSelected.length) { box.classList.remove('show'); return; }
+  document.getElementById('suggestionText').textContent = sug.msg;
+  const tagsEl = document.getElementById('suggestionTags');
+  tagsEl.innerHTML = notYetSelected.map(id => {
+    const k = KPI_POOL.find(p => p.id === id);
+    return k ? `<span class="suggestion-tag" onclick="addSuggestedKPI('${id}')">${k.name}</span>` : '';
+  }).join('');
+  box.classList.add('show');
+}
+
+function addSuggestedKPI(id) {
+  if (!selectedKPIs.find(k => k.id === id)) toggleKPI(id);
+}
+
+// ───────────────────────────────────────────────
+// DASHBOARD
+// ───────────────────────────────────────────────
+function goToDashboard() {
+  if (!selectedKPIs.length) { showToast('Please select at least one KPI first.', 'error'); return; }
+  switchTab('dashboard', document.querySelector('[data-tab=dashboard]'));
+}
+
+function renderDashboard() {
+  const empName = document.getElementById('empName').value || 'Sales Agent';
+  const period  = document.getElementById('empPeriod').value || 'Current Period';
+  document.getElementById('dashTitle').textContent = `${empName}'s KPI Dashboard`;
+  document.getElementById('dashSub').textContent = `Period: ${period}`;
+  document.getElementById('scorePeriod').textContent = `Employee: ${empName} · ${period}`;
+
+  if (!selectedKPIs.length) {
+    document.getElementById('kpiCards').innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-state-icon">📋</div>
+      <h3>No KPIs configured</h3>
+      <p>Go to KPI Setup to select your KPIs and targets for this period.</p>
+      <button class="btn btn-primary" style="margin-top:1rem" onclick="switchTab('setup', document.querySelector('[data-tab=setup]'))">Go to Setup →</button>
+    </div>`;
+    ['statTotal','statGreen','statYellow','statRed'].forEach(id => document.getElementById(id).textContent = '0');
+    document.getElementById('overallNum').textContent = '–';
+    document.getElementById('scoreLabel').textContent = 'Set your KPIs to get started';
+    return;
+  }
+
+  let weightedScore = 0, totalWeight = 0;
+  let green = 0, yellow = 0, red = 0;
+
+  const cards = selectedKPIs.map((k, i) => {
+    const pct = k.actual !== '' && +k.target > 0
+      ? Math.min(Math.round((+k.actual / +k.target) * 100), 150) : null;
+    const status = pct === null ? 'none' : pct >= 80 ? 'green' : pct >= 60 ? 'yellow' : 'red';
+    if (pct !== null) {
+      if (status === 'green') green++;
+      else if (status === 'yellow') yellow++;
+      else red++;
+      weightedScore += (pct / 100) * k.weight;
+      totalWeight += +k.weight;
+    }
+    const c = CAT_COLORS[k.cat];
+    const barColor = status === 'green' ? 'var(--success)' : status === 'yellow' ? 'var(--warning)' : status === 'red' ? 'var(--danger)' : 'var(--border)';
+    const chipClass = status === 'green' ? 'status-green' : status === 'yellow' ? 'status-yellow' : status === 'red' ? 'status-red' : '';
+    const chipLabel = pct === null ? '' : `<span class="status-chip ${chipClass}">${pct >= 80 ? '✅ On Track' : pct >= 60 ? '⚠️ At Risk' : '🔴 Below'}</span>`;
+    return `<div class="kpi-card">
+      <div class="kpi-card-header">
+        <div class="kpi-card-name">${k.name}</div>
+        <div class="kpi-card-weight">${k.weight}%</div>
+      </div>
+      <div style="margin-bottom:.5rem">
+        <span class="cat-badge" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${k.cat}</span>
+        &nbsp; <span style="font-size:.75rem;color:var(--text-muted)">${k.freq}</span>
+        &nbsp; ${chipLabel}
+      </div>
+      <div class="kpi-card-values">
+        <div class="kpi-val">
+          <div class="kpi-val-label">Target</div>
+          <div class="kpi-val-num" style="color:var(--primary)">${k.target} <span style="font-size:.75rem;font-weight:500">${k.unit}</span></div>
+        </div>
+        <div class="kpi-val">
+          <div class="kpi-val-label">Actual</div>
+          <div class="kpi-val-num" style="color:${barColor}">${k.actual !== '' ? k.actual + ' ' + k.unit : '—'}</div>
+        </div>
+        <div class="kpi-val">
+          <div class="kpi-val-label">Achievement</div>
+          <div class="kpi-val-num" style="color:${barColor}">${pct !== null ? pct + '%' : '—'}</div>
+        </div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" style="width:${pct !== null ? Math.min(pct, 100) : 0}%;background:${barColor}"></div>
+      </div>
+      <div class="progress-label"><span>0</span><span>${k.target} ${k.unit}</span></div>
+      <div class="achievement-input-row">
+        <input type="number" placeholder="Enter actual value..." value="${k.actual}" id="actual-${i}" min="0" step="any" />
+        <button class="btn btn-primary" onclick="setActual(${i})">Update</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('kpiCards').innerHTML = cards;
+  document.getElementById('statTotal').textContent = selectedKPIs.length;
+  document.getElementById('statGreen').textContent = green;
+  document.getElementById('statYellow').textContent = yellow;
+  document.getElementById('statRed').textContent = red;
+
+  const overallPct = totalWeight > 0 ? Math.round((weightedScore / totalWeight) * 100) : null;
+  const overallEl = document.getElementById('overallNum');
+  if (overallPct !== null) {
+    overallEl.textContent = overallPct + '%';
+    const label = overallPct >= 80 ? '🎉 Great Performance!' : overallPct >= 60 ? '⚠️ Needs Improvement' : '🚨 Below Expectations';
+    document.getElementById('scoreLabel').textContent = label;
+  } else {
+    overallEl.textContent = '–';
+    document.getElementById('scoreLabel').textContent = 'Enter actual values to see your score';
+  }
+}
+
+function setActual(i) {
+  const val = document.getElementById('actual-' + i).value;
+  selectedKPIs[i].actual = val;
+  renderDashboard();
+  showToast('Actual value updated ✓', 'success');
+}
+
+// ───────────────────────────────────────────────
+// TAB SWITCHING
+// ───────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'dashboard') renderDashboard();
+}
+
+// ───────────────────────────────────────────────
+// PERSIST
+// ───────────────────────────────────────────────
+function saveToStorage() {
+  const data = {
+    emp: {
+      name: document.getElementById('empName').value,
+      id: document.getElementById('empId').value,
+      team: document.getElementById('empTeam').value,
+      channel: document.getElementById('empChannel').value,
+      period: document.getElementById('empPeriod').value,
+      region: document.getElementById('empRegion').value,
+    },
+    kpis: selectedKPIs
+  };
+  localStorage.setItem('muscatel_kpis', JSON.stringify(data));
+  showToast('KPI set saved locally ✓', 'success');
+}
+
+function loadFromStorage() {
+  const raw = localStorage.getItem('muscatel_kpis');
+  if (!raw) { showToast('No saved data found.', 'error'); return; }
+  const data = JSON.parse(raw);
+  document.getElementById('empName').value = data.emp.name || '';
+  document.getElementById('empId').value = data.emp.id || '';
+  document.getElementById('empTeam').value = data.emp.team || '';
+  document.getElementById('empChannel').value = data.emp.channel || '';
+  document.getElementById('empPeriod').value = data.emp.period || '';
+  document.getElementById('empRegion').value = data.emp.region || '';
+  selectedKPIs = data.kpis || [];
+  renderPool();
+  renderSelectedTable();
+  updateSuggestions();
+  showToast('Saved KPI set loaded ✓', 'success');
+}
+
+// ───────────────────────────────────────────────
+// TOAST
+// ───────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '❌ ' : 'ℹ️ ') + msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3000);
+}
+
+// ───────────────────────────────────────────────
+// INIT
+// ───────────────────────────────────────────────
+renderPool();
+renderSelectedTable();
+</script>
+</body>
+</html>
