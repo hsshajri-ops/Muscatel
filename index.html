@@ -538,7 +538,7 @@
   <div class="panel" id="panel-gdp">
     <div class="section-heading">
       <h2>GDP Comparison</h2>
-      <p>Compare GDP (current US$) trends between two countries, 1960–2021 · World Bank data</p>
+      <p>GDP (current US$) trends, 1960–2021 · World Bank data</p>
     </div>
 
     <div class="card" style="margin-bottom:1.5rem">
@@ -546,18 +546,37 @@
       <div class="form-grid">
         <div class="form-group">
           <label>Country 1</label>
-          <select id="gdpCountry1" onchange="renderGdpChart()"></select>
+          <select id="gdpCountry1" onchange="renderAllGdpCharts()"></select>
         </div>
         <div class="form-group">
           <label>Country 2</label>
-          <select id="gdpCountry2" onchange="renderGdpChart()"></select>
+          <select id="gdpCountry2" onchange="renderAllGdpCharts()"></select>
+        </div>
+        <div class="form-group">
+          <label>Pie Chart Year</label>
+          <select id="gdpPieYear" onchange="renderGdpPie()"></select>
         </div>
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title"><span class="dot"></span> Graph 1 — Country 1 GDP Progress</div>
+      <div id="gdpChartSingle" style="width:100%;height:420px"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title"><span class="dot"></span> Graph 2 — Country 1 vs Country 2 GDP Comparison</div>
+      <div id="gdpChartCompare" style="width:100%;height:420px"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title"><span class="dot"></span> Graph 3 — Country 1 vs Country 2 (Dual Y-Axis)</div>
+      <div id="gdpChartDual" style="width:100%;height:420px"></div>
+    </div>
+
     <div class="card">
-      <div class="card-title"><span class="dot"></span> GDP Trend</div>
-      <div id="gdpChart" style="width:100%;height:480px"></div>
+      <div class="card-title"><span class="dot"></span> Pie Chart — Top 5 Countries by GDP</div>
+      <div id="gdpChartPie" style="width:100%;height:480px"></div>
     </div>
   </div>
 </main>
@@ -895,7 +914,7 @@ function switchTab(tab, btn) {
   document.getElementById('panel-' + tab).classList.add('active');
   btn.classList.add('active');
   if (tab === 'dashboard') renderDashboard();
-  if (tab === 'gdp') renderGdpChart();
+  if (tab === 'gdp') renderAllGdpCharts();
 }
 
 // ───────────────────────────────────────────────
@@ -911,25 +930,85 @@ function populateGdpSelectors() {
   sel2.innerHTML = opts;
   sel1.value = 'GBR';
   sel2.value = 'BRA';
+
+  const yearSel = document.getElementById('gdpPieYear');
+  yearSel.innerHTML = GDP_DATA.years.map(y => `<option>${y}</option>`).join('');
+  yearSel.value = '2021';
 }
 
-function renderGdpChart() {
+function getGdpCountries() {
   const code1 = document.getElementById('gdpCountry1').value;
   const code2 = document.getElementById('gdpCountry2').value;
-  const c1 = GDP_DATA.countries.find(c => c.code === code1);
-  const c2 = GDP_DATA.countries.find(c => c.code === code2);
-  if (!c1 || !c2) return;
+  return [GDP_DATA.countries.find(c => c.code === code1), GDP_DATA.countries.find(c => c.code === code2)];
+}
 
-  const years1 = GDP_DATA.years.filter(y => c1.gdp[y] !== undefined);
-  const years2 = GDP_DATA.years.filter(y => c2.gdp[y] !== undefined);
+function renderAllGdpCharts() {
+  renderGdpSingle();
+  renderGdpCompare();
+  renderGdpDual();
+  renderGdpPie();
+}
 
-  const trace1 = { x: years1, y: years1.map(y => c1.gdp[y]), mode: 'lines', name: c1.name };
-  const trace2 = { x: years2, y: years2.map(y => c2.gdp[y]), mode: 'lines', name: c2.name };
-
-  Plotly.newPlot('gdpChart', [trace1, trace2], {
-    title: `${c1.name} vs ${c2.name} — GDP (current US$)`,
+// Graph 1: single country GDP progress
+function renderGdpSingle() {
+  const [c1] = getGdpCountries();
+  if (!c1) return;
+  const years = GDP_DATA.years.filter(y => c1.gdp[y] !== undefined);
+  const trace = { x: years, y: years.map(y => c1.gdp[y]), mode: 'lines', name: c1.code };
+  Plotly.newPlot('gdpChartSingle', [trace], {
+    title: c1.name + ' GDP progress',
     xaxis: { title: 'Year' },
     yaxis: { title: 'GDP (current US$)' },
+    margin: { t: 50 }
+  }, { responsive: true });
+}
+
+// Graph 2: two-country comparison, shared y-axis
+function renderGdpCompare() {
+  const [c1, c2] = getGdpCountries();
+  if (!c1 || !c2) return;
+  const years1 = GDP_DATA.years.filter(y => c1.gdp[y] !== undefined);
+  const years2 = GDP_DATA.years.filter(y => c2.gdp[y] !== undefined);
+  const trace1 = { x: years1, y: years1.map(y => c1.gdp[y]), mode: 'lines', name: c1.code };
+  const trace2 = { x: years2, y: years2.map(y => c2.gdp[y]), mode: 'lines', name: c2.code };
+  Plotly.newPlot('gdpChartCompare', [trace1, trace2], {
+    title: 'GDP comparison',
+    xaxis: { title: 'Year' },
+    yaxis: { title: 'GDP (current US$)' },
+    margin: { t: 50 }
+  }, { responsive: true });
+}
+
+// Graph 3: two-country comparison, dual y-axis (secondary axis)
+function renderGdpDual() {
+  const [c1, c2] = getGdpCountries();
+  if (!c1 || !c2) return;
+  const years1 = GDP_DATA.years.filter(y => c1.gdp[y] !== undefined);
+  const years2 = GDP_DATA.years.filter(y => c2.gdp[y] !== undefined);
+  const trace1 = { x: years1, y: years1.map(y => c1.gdp[y]), mode: 'lines', name: c1.code, yaxis: 'y' };
+  const trace2 = { x: years2, y: years2.map(y => c2.gdp[y]), mode: 'lines', name: c2.code, yaxis: 'y2' };
+  Plotly.newPlot('gdpChartDual', [trace1, trace2], {
+    title: 'GDP comparison',
+    xaxis: { title: 'Year' },
+    yaxis: { title: c1.code },
+    yaxis2: { title: c2.code, overlaying: 'y', side: 'right' },
+    margin: { t: 50 }
+  }, { responsive: true });
+}
+
+// Pie chart: top 5 countries by GDP for the selected year
+function renderGdpPie() {
+  const year = document.getElementById('gdpPieYear').value;
+  const ranked = GDP_DATA.countries
+    .filter(c => c.gdp[year] !== undefined)
+    .sort((a, b) => b.gdp[year] - a.gdp[year])
+    .slice(0, 5);
+  Plotly.newPlot('gdpChartPie', [{
+    type: 'pie',
+    labels: ranked.map(c => c.name),
+    values: ranked.map(c => c.gdp[year])
+  }], {
+    title: `Top 5 countries by GDP in ${year}`,
     margin: { t: 50 }
   }, { responsive: true });
 }
