@@ -319,6 +319,8 @@
       tbody td::before { content: attr(data-label); font-size: .75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
     }
   </style>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <script src="assets/gdp_data.js"></script>
 </head>
 <body>
 
@@ -343,6 +345,7 @@
   <div class="nav-tabs-inner">
     <button class="tab-btn active" data-tab="setup" onclick="switchTab('setup', this)"><span class="tab-icon">⚙️</span> KPI Setup</button>
     <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard', this)"><span class="tab-icon">📊</span> Dashboard</button>
+    <button class="tab-btn" data-tab="gdp" onclick="switchTab('gdp', this)"><span class="tab-icon">🌍</span> GDP Comparison</button>
   </div>
 </nav>
 
@@ -528,6 +531,33 @@
         <p>Go to KPI Setup to select your KPIs and targets for this period.</p>
         <button class="btn btn-primary" style="margin-top:1rem" onclick="switchTab('setup', document.querySelector('[data-tab=setup]'))">Go to Setup →</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===================== GDP COMPARISON PANEL ===================== -->
+  <div class="panel" id="panel-gdp">
+    <div class="section-heading">
+      <h2>GDP Comparison</h2>
+      <p>Compare GDP (current US$) trends between two countries, 1960–2021 · World Bank data</p>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title"><span class="dot"></span> Select Countries</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Country 1</label>
+          <select id="gdpCountry1" onchange="renderGdpChart()"></select>
+        </div>
+        <div class="form-group">
+          <label>Country 2</label>
+          <select id="gdpCountry2" onchange="renderGdpChart()"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="dot"></span> GDP Trend</div>
+      <div id="gdpChart" style="width:100%;height:480px"></div>
     </div>
   </div>
 </main>
@@ -865,6 +895,43 @@ function switchTab(tab, btn) {
   document.getElementById('panel-' + tab).classList.add('active');
   btn.classList.add('active');
   if (tab === 'dashboard') renderDashboard();
+  if (tab === 'gdp') renderGdpChart();
+}
+
+// ───────────────────────────────────────────────
+// GDP COMPARISON
+// ───────────────────────────────────────────────
+function populateGdpSelectors() {
+  const opts = GDP_DATA.countries
+    .map(c => `<option value="${c.code}">${c.name}</option>`)
+    .join('');
+  const sel1 = document.getElementById('gdpCountry1');
+  const sel2 = document.getElementById('gdpCountry2');
+  sel1.innerHTML = opts;
+  sel2.innerHTML = opts;
+  sel1.value = 'GBR';
+  sel2.value = 'BRA';
+}
+
+function renderGdpChart() {
+  const code1 = document.getElementById('gdpCountry1').value;
+  const code2 = document.getElementById('gdpCountry2').value;
+  const c1 = GDP_DATA.countries.find(c => c.code === code1);
+  const c2 = GDP_DATA.countries.find(c => c.code === code2);
+  if (!c1 || !c2) return;
+
+  const years1 = GDP_DATA.years.filter(y => c1.gdp[y] !== undefined);
+  const years2 = GDP_DATA.years.filter(y => c2.gdp[y] !== undefined);
+
+  const trace1 = { x: years1, y: years1.map(y => c1.gdp[y]), mode: 'lines', name: c1.name };
+  const trace2 = { x: years2, y: years2.map(y => c2.gdp[y]), mode: 'lines', name: c2.name };
+
+  Plotly.newPlot('gdpChart', [trace1, trace2], {
+    title: `${c1.name} vs ${c2.name} — GDP (current US$)`,
+    xaxis: { title: 'Year' },
+    yaxis: { title: 'GDP (current US$)' },
+    margin: { t: 50 }
+  }, { responsive: true });
 }
 
 // ───────────────────────────────────────────────
@@ -920,6 +987,7 @@ function showToast(msg, type = '') {
 // ───────────────────────────────────────────────
 renderPool();
 renderSelectedTable();
+populateGdpSelectors();
 </script>
 </body>
 </html>
