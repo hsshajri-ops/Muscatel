@@ -574,9 +574,22 @@
       <div id="gdpChartSingle" style="width:100%;height:420px"></div>
     </div>
 
-    <div class="card">
+    <div class="card" style="margin-bottom:1.5rem">
       <div class="card-title"><span class="dot"></span> Pie Chart — Top 5 Countries by GDP</div>
       <div id="gdpChartPie" style="width:100%;height:480px"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title"><span class="dot"></span> Graph 4 — GDP with Mean, Std Dev, Max &amp; Min</div>
+      <div id="gdpChartStats" style="width:100%;height:480px"></div>
+      <div style="overflow-x:auto;margin-top:1rem">
+        <table id="gdpStatsTable">
+          <thead>
+            <tr><th>Country</th><th>Mean</th><th>Std Dev</th><th>Max</th><th>Max Year</th><th>Min</th><th>Min Year</th></tr>
+          </thead>
+          <tbody id="gdpStatsBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </main>
@@ -947,6 +960,69 @@ function renderAllGdpCharts() {
   renderGdpCompare();
   renderGdpDual();
   renderGdpPie();
+  renderGdpStats();
+}
+
+function computeGdpStats(c) {
+  const years = GDP_DATA.years.filter(y => c.gdp[y] !== undefined);
+  const values = years.map(y => c.gdp[y]);
+  const n = values.length;
+  const mean = values.reduce((s, v) => s + v, 0) / n;
+  const variance = values.reduce((s, v) => s + (v - mean) ** 2, 0) / n;
+  const std = Math.sqrt(variance);
+  let maxV = values[0], minV = values[0], maxY = years[0], minY = years[0];
+  values.forEach((v, i) => {
+    if (v > maxV) { maxV = v; maxY = years[i]; }
+    if (v < minV) { minV = v; minY = years[i]; }
+  });
+  return { years, values, mean, std, max: maxV, maxYear: maxY, min: minV, minYear: minY };
+}
+
+function fmtGdp(v) {
+  return v.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+// Graph 4: GDP comparison with mean, std dev, max & min annotated
+function renderGdpStats() {
+  const [c1, c2] = getGdpCountries();
+  if (!c1 || !c2) return;
+  const s1 = computeGdpStats(c1);
+  const s2 = computeGdpStats(c2);
+
+  const lineTrace1 = { x: s1.years, y: s1.values, mode: 'lines', name: c1.code, line: { color: '#4f46e5' } };
+  const lineTrace2 = { x: s2.years, y: s2.values, mode: 'lines', name: c2.code, line: { color: '#f59e0b' } };
+  const meanTrace1 = { x: s1.years, y: s1.years.map(() => s1.mean), mode: 'lines', name: `${c1.code} mean`, line: { color: '#4f46e5', dash: 'dash' } };
+  const meanTrace2 = { x: s2.years, y: s2.years.map(() => s2.mean), mode: 'lines', name: `${c2.code} mean`, line: { color: '#f59e0b', dash: 'dash' } };
+  const markers = {
+    x: [s1.maxYear, s1.minYear, s2.maxYear, s2.minYear],
+    y: [s1.max, s1.min, s2.max, s2.min],
+    mode: 'markers+text',
+    name: 'Max / Min',
+    marker: { size: 10, color: ['#4f46e5', '#4f46e5', '#f59e0b', '#f59e0b'], symbol: ['triangle-up', 'triangle-down', 'triangle-up', 'triangle-down'] },
+    text: [`${c1.code} max`, `${c1.code} min`, `${c2.code} max`, `${c2.code} min`],
+    textposition: 'top center',
+    showlegend: false
+  };
+
+  Plotly.newPlot('gdpChartStats', [lineTrace1, lineTrace2, meanTrace1, meanTrace2, markers], {
+    title: `${c1.name} vs ${c2.name} — GDP with Mean, Std Dev, Max & Min`,
+    xaxis: { title: 'Year' },
+    yaxis: { title: 'GDP (current US$)' },
+    margin: { t: 50 }
+  }, { responsive: true });
+
+  document.getElementById('gdpStatsBody').innerHTML = [c1, c2].map((c, i) => {
+    const s = i === 0 ? s1 : s2;
+    return `<tr>
+      <td data-label="Country"><strong>${c.name} (${c.code})</strong></td>
+      <td data-label="Mean">${fmtGdp(s.mean)}</td>
+      <td data-label="Std Dev">${fmtGdp(s.std)}</td>
+      <td data-label="Max">${fmtGdp(s.max)}</td>
+      <td data-label="Max Year">${s.maxYear}</td>
+      <td data-label="Min">${fmtGdp(s.min)}</td>
+      <td data-label="Min Year">${s.minYear}</td>
+    </tr>`;
+  }).join('');
 }
 
 // Graph 1: single country GDP progress
